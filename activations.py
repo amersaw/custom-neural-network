@@ -1,7 +1,15 @@
 from math import exp
 def sigmoid(v):
 	return 1.0 / (1.0 + exp(-v))
-	
-# Calculate the derivative of an neuron output
-def sigmoid_derivative(output):
-	return output * (1.0 - output)
+
+def sigmoid_derivative(v):
+	return v * (1.0 - v)
+
+
+def tanh(v):
+	import numpy as np
+	return np.tanh(v)
+
+def tanh_derivative(v):
+	import numpy as np
+	return 1- np.tanh(v)**2 
