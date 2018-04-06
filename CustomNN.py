@@ -78,6 +78,9 @@ class CustomNN:
 			epoch_loss = 0
 			for row in data:
 				epoch_loss += self.do_train_step(row[0:-1],row[-1])
+			if epoch_loss <= 0.1:
+				print('>epoch=%d, error=%.3f' % (epoch, epoch_loss))
+				break
 			if epoch % 1000 ==0:
 				print('>epoch=%d, error=%.3f' % (epoch, epoch_loss))
 	def predict(self, row):
