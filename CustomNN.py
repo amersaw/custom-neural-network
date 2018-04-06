@@ -3,7 +3,7 @@ from activations import *
 
 class CustomNN:
 	def __init__ (self, input_count, hidden_count, output_count, l_rate,
-					aFunc = sigmoid, aFuncDir = sigmoid_derivative):
+					aFunc = sigmoid, aFuncDer = sigmoid_derivative):
 		self.input_count = input_count
 		self.hidden_count = hidden_count
 		self.output_count = output_count
@@ -14,7 +14,7 @@ class CustomNN:
 		self.add_layer(hidden_count, output_count)
 		# print(self.net[-1])
 		self.activationFunction = aFunc
-		self.activationFunctionDerivative = aFuncDir
+		self.activationFunctionDerivative = aFuncDer
 		# print(self.net)
 
 	def add_layer(self, prev_count, curr_count):
@@ -26,10 +26,10 @@ class CustomNN:
 			res.append(item)
 		self.net.append(res)
 
-	def activate(self, layer, values):
-		res = layer['b']
-		for i in range(len(layer['w'])): # can be done usind dot product
-			res += layer['w'][i] * values[i]
+	def activate(self, neuron, values):
+		res = neuron['b']
+		for i in range(len(neuron['w'])): # can be done usind dot product
+			res += neuron['w'][i] * values[i]
 		return res
 
 	def forward_propagate(self, row):
@@ -44,24 +44,16 @@ class CustomNN:
 		# print(self.net)
 		return input
 
-	def back_propagate(self, actual):
-		for i in reversed(range(len(self.net))):
+	def back_propagate(self,actual):
+		for i in range(len(self.net)-1, -1, -1):
 			layer = self.net[i]
-			errors = []
-			if i == len(self.net) -1:  # the last layer
-				for j in range(len(layer)):
-					neuron=layer[j]
-					errors.append(actual[j] - neuron['output'])
-			else: # internal layers
-				for j in range(len(layer)):
-					error=0
-					for neuron in self.net[i+1]:
-						error += neuron['w'][j] * neuron['change']
-					errors.append(error)
 			for j in range(len(layer)):
 				neuron = layer[j]
-				neuron['change'] = errors[j] * self.activationFunctionDerivative(neuron['output'])
-		# print(self.net)
+				if i == len(self.net) -1: # the last layer
+					error = actual[j] - neuron['output']
+				else:
+					error = sum ([nextneuron['w'][j] * nextneuron['change'] for nextneuron in self.net[i+1]])
+				neuron['change'] = error * self.activationFunctionDerivative(neuron['output']);
 
 	def update_weights(self, record):
 		for i in range(len(self.net)): # go across layers
@@ -89,6 +81,5 @@ class CustomNN:
 			if epoch % 1000 ==0:
 				print('>epoch=%d, error=%.3f' % (epoch, epoch_loss))
 	def predict(self, row):
-		self.forward_propagate(row)
-		outputs = [a['output'] for a in self.net[-1]]
+		outputs = self.forward_propagate(row)
 		return outputs.index(max(outputs))
