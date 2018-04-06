@@ -10,12 +10,9 @@ class CustomNN:
 		self.learning_rate = l_rate
 		self.net = list()
 		self.add_layer(input_count, hidden_count)
-		# print(self.net[-1])
 		self.add_layer(hidden_count, output_count)
-		# print(self.net[-1])
 		self.activationFunction = aFunc
 		self.activationFunctionDerivative = aFuncDer
-		# print(self.net)
 
 	def add_layer(self, prev_count, curr_count):
 		res = list()
@@ -67,17 +64,23 @@ class CustomNN:
 	def do_train_step (self, record, result):
 		outputs = self.forward_propagate(record)
 		expected = [0 for i in range(self.output_count)]
+		#print(result)
 		expected[int(result)] = 1
 		loss = sum([(expected[j] - outputs[j])**2 for j in range(self.output_count)])
 		self.back_propagate(expected)
 		self.update_weights(record)
 		return loss
 
-	def train_network(self, data, epoch_count):
+	def train_network(self, data, epoch_count,print_loss=False):
 		for epoch in range(epoch_count):
 			epoch_loss = 0
+			i = 0
 			for row in data:
-				epoch_loss += self.do_train_step(row[0:-1],row[-1])
+				loss = self.do_train_step(row[0:-1],row[-1])
+				i += 1.0
+				epoch_loss += loss
+				if print_loss:
+					print('loss : %.3f\t' %(epoch_loss / i),end='',flush=True)
 			if epoch_loss <= 0.1:
 				print('>epoch=%d, error=%.3f' % (epoch, epoch_loss))
 				break
